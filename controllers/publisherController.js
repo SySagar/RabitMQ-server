@@ -14,6 +14,7 @@ const publishMessage = async (req,res) => {
       queueMessage: queueMessage,
     }
 
+    console.log(msg)
     // connect to 'test-queue', create one if doesnot exist already
     await channel.assertQueue(queueName, { durable: false });
 
