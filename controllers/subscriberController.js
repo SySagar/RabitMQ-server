@@ -4,7 +4,7 @@ import { connect } from "amqplib";
 
 const subscribeMessage = async (req,res) => {
     try {
-      const queue = req.body.queueName;
+      const notificationQueue = req.body.notificationQueueID || 'test';
       const connection = await connect(process.env.CLOUDAMQP_URL);
       const channel = await connection.createChannel();
 
@@ -14,19 +14,28 @@ const subscribeMessage = async (req,res) => {
       });
       
       var notificationMessage;
-      await channel.assertQueue(queue, { durable: false });
-      console.log("queue",queue)
+      var retrievedMessage;
+      // console.log("queue",queue)
       await channel.consume(
-        queue,
+        notificationQueue,
         (message) => {
-          console.log("message",message.content.toString())
           if (message) {
-              notificationMessage = JSON.parse(message.content.toString());
+            console.log("message",message.content.toString())
+              retrievedMessage = JSON.parse(message.content.toString());
+              channel.ack(message);
+              res.send(retrievedMessage)
           }
-        },
-        { noAck: true }
-        );
-        res.send(notificationMessage);
+
+          // if(retrievedMessage.companyName === companyName){
+          //   notificationMessage = retrievedMessage.queueMessage;
+          // }
+          // else
+          // {
+          //   notificationMessage = "No new notification";
+          // }
+        });
+        if(retrievedMessage===undefined)
+        res.send("no new notification");
   
       // console.log(" [*] Waiting for messages. To exit press CTRL+C");
     } catch (err) {

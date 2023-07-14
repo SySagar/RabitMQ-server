@@ -9,17 +9,15 @@ const publishMessage = async (req,res) => {
     const connection = await connect(process.env.CLOUDAMQP_URL);
     const channel = await connection.createChannel();
 
-    const msg = {
-      companyName: companyName,
-      queueMessage: queueMessage,
-    }
+    const uniqueQueueName = companyName + "-" + queueName;
 
-    console.log(msg)
+    // console.log(msg)
     // connect to 'test-queue', create one if doesnot exist already
-    await channel.assertQueue(queueName, { durable: false });
+    await channel.assertQueue(uniqueQueueName, { durable: false });
 
     // send data to queue
-    await channel.sendToQueue(queueName, Buffer.from(JSON.stringify(msg)));
+    const routingKey = uniqueQueueName;
+    await channel.sendToQueue(routingKey, Buffer.from(JSON.stringify(queueMessage)));
 
     // close the channel and connections
     await channel.close();
