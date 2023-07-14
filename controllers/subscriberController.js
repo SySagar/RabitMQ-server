@@ -19,7 +19,7 @@ const subscribeMessage = async (req,res) => {
         queue,
         (message) => {
           if (message) {
-              notificationMessage = JSON.parse(message.content.toString()
+              notificationMessage = JSON.parse(message.content.queueMessage.toString()
             );
           }
         },
